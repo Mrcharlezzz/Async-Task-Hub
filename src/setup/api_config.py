@@ -1,8 +1,15 @@
+
+import inject
 from pydantic_settings import BaseSettings
 
+from src.api.domain.repositories import TaskManagerRepository
+from src.api.infrastructure.celery.celery_task_manager import CeleryTaskManager
+
+
 class ApiSettings(BaseSettings):
-    MAX_DIGITS: int = 2000
-    CORS_ALLOW_ALL: bool = True
+    MAX_DIGITS: int
+    APP_NAME: str
+    APP_VERSION: str
 
     class Config:
         env_file = ".env"
@@ -10,4 +17,15 @@ class ApiSettings(BaseSettings):
 def get_api_settings() -> ApiSettings:
     return ApiSettings()
 
-#REMOVE CORS_ALLOW_ALL
+def _config(binder: inject.Binder) -> None:
+    """
+    Bind domain interfaces to concrete implementations.
+    """
+    # If you want singleton semantics, bind an instance (not a class):
+    binder.bind(TaskManagerRepository, CeleryTaskManager())
+
+
+def configure_di() -> None:
+    """Dependency injection configuration."""
+    if not inject.is_configured():
+        inject.configure(_config)

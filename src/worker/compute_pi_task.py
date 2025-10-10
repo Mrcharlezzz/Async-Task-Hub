@@ -23,8 +23,11 @@ def compute_pi(self, payload: dict) -> dict:
 
     for k in range(digits):
         time.sleep(_settings.SLEEP_PER_DIGIT_SEC)
-        percent = int((k + 1) / digits)
-        self.update_state(state="PROGRESS", meta={"percent": percent,"message": None, "result": None})
+        progress = (k + 1) / digits
+        self.update_state(
+            state="PROGRESS",
+            meta={"progress": progress, "message": None, "result": None},
+        )
 
-    result = {"percent": 1, "message": None, "result": pi}
+    result = {"progress": 1.0, "message": None, "result": pi}
     return result

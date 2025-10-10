@@ -1,7 +1,8 @@
 from celery.result import AsyncResult
-
-from src.api.application.models import StatusDTO
 from pydantic import ValidationError
+
+from src.api.domain.models import StatusDTO
+
 
 def to_status_dto(result : AsyncResult) -> StatusDTO:
     info = result.info or {}
@@ -10,7 +11,7 @@ def to_status_dto(result : AsyncResult) -> StatusDTO:
             return StatusDTO(
                 task_id=result.id,
                 state="FAILURE",
-                percent=None,
+                progress=None,
                 message=info.get("message"),
                 result=None,
             )
@@ -18,7 +19,7 @@ def to_status_dto(result : AsyncResult) -> StatusDTO:
         return StatusDTO(
             task_id=result.id,
             state=result.state,
-            percent=info.get("percent"),
+            progress=info.get("progress"),
             message=info.get("message"),
             result=result.result if result.successful() else None,
         )
@@ -28,7 +29,7 @@ def to_status_dto(result : AsyncResult) -> StatusDTO:
         return StatusDTO(
             task_id=result.id,
             state="FAILURE",
-            percent=None,
+            progress=None,
             message=f"Mapping error: {e.errors()}",
             result=None,
         )

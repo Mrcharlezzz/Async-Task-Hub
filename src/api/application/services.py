@@ -1,13 +1,26 @@
-from src.api.application.models import StatusDTO
-from src.api.infrastructure.celery.task_queue import enqueue
-from src.api.infrastructure.celery.task_status import get_status
+from src.api.domain.models import StatusDTO
+from src.api.domain.repositories import TaskManagerRepository
+import inject
+
 
 class ProgressService:
+    """Provides access to progress data for background tasks."""
+
+    def __init__(self):
+        self._task_manager: TaskManagerRepository = inject.instance(TaskManagerRepository)
+
     def get_progress(self, task_name: str) -> StatusDTO:
-        status = get_status(task_name)
+        """Return the current status for the task identified by ``task_name``."""
+        status = self._task_manager.get_status(task_name)
         return status
 
 class TaskService:
+    """Handles submission of asynchronous tasks to the Celery broker."""
+
+    def __init__(self):
+        self._task_manager: TaskManagerRepository = inject.instance(TaskManagerRepository)
+
     def push_task(self, task_name, payload: dict) -> str:
-        task_id = enqueue(task_name, payload)
+        """Enqueue a task with the provided payload and return its task id."""
+        task_id = self._task_manager.enqueue(task_name, payload)
         return task_id
