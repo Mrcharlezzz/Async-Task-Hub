@@ -13,7 +13,7 @@ Test Task project for JetBrains internship application.
 - [Testing](#testing)
 
 ## Overview
-This project exposes an HTTP API that allows clients to enqueue long-running jobs (e.g., computing π) and poll for their status. Celery is used as the task queue, Redis serves as broker/backend, and FastAPI provides the HTTP layer.
+This project exposes an HTTP API that allows clients to enqueue long-running jobs (e.g., computing π) and poll for their status. Celery is used as the task queue, Redis serves as broker/backend, and FastAPI provides the HTTP layer. The service is designed with a scalable architecture, allowing new background tasks to be easily added.
 
 ## Structure
 - **FastAPI (src/api/presentation)** — HTTP routing and request handling
@@ -63,5 +63,4 @@ Services started:
 2. API enqueues `compute_pi` via Celery.
 3. Worker updates progress using `update_state` and ultimately stores the result.
 4. Client polls `/check_progress` until `state` is `SUCCESS`.
-
 
