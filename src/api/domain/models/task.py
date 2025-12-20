@@ -7,7 +7,7 @@ from src.api.domain.models.task_status import TaskStatus
 
 
 class Task(BaseModel):
-    id: str
+    id: str | None = None
     task_type: str
     payload: TaskPayload  # can hold any subclass
     result: dict | None = None

@@ -100,5 +100,5 @@ async def create_doc_task(
     """
     Enqueue a document analysis task with a typed payload.
     """
-    task = await svc.create_task(body)
+    task = await svc.create_task("document_analysis", body)
     return task
