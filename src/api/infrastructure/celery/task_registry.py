@@ -13,6 +13,11 @@ class TaskRegistry:
 
     def __init__(self) -> None:
         self._registry: dict[str, TaskRoute] = {
+            "compute_pi": TaskRoute(
+                task_type="compute_pi",
+                celery_task="compute_pi",
+                queue=None,
+            ),
             "document_analysis": TaskRoute(
                 task_type="document_analysis",
                 celery_task="document_analysis",

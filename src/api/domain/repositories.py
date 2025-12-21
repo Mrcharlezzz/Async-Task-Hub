@@ -9,10 +9,7 @@ from src.api.domain.models.task import Task
 class TaskManagerRepository(Protocol):
     """Repository contract for enqueueing tasks and retrieving their status."""
 
-    async def enqueue(self, task_name: str, payload: dict, queue: str | None = None) -> str:
-        """Schedule a task with the given payload (and optional queue) and return its identifier."""
-
-    async def enqueue_task(self, task: Task) -> str:
+    async def enqueue(self, task: Task) -> str:
         """Schedule a task and return its identifier."""
 
     async def get_status(self, task_id: str) -> TaskStatus:

@@ -28,10 +28,10 @@ class TaskService:
     def __init__(self):
         self._task_manager: TaskManagerRepository = inject.instance(TaskManagerRepository)
 
-    async def push_task(self, task_name, payload: dict) -> str:
+    async def push_task(self, task_type: str, payload: TaskPayload) -> str:
         """Enqueue a task with the provided payload and return its task id."""
-        task_id = await self._task_manager.enqueue(task_name, payload, queue=None)
-        return task_id
+        task = await self.create_task(task_type, payload)
+        return task.id
 
     async def create_task(self, task_type: str, payload: TaskPayload) -> Task:
         """
@@ -43,5 +43,5 @@ class TaskService:
             status=TaskStatus(state=TaskState.QUEUED, progress=TaskProgress()),
             metadata=TaskMetadata(created_at=datetime.now(timezone.utc)),
         )
-        task.id = await self._task_manager.enqueue_task(task)
+        task.id = await self._task_manager.enqueue(task)
         return task

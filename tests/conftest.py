@@ -17,16 +17,10 @@ class StubTaskManager(TaskManagerRepository):
     """Simple in-memory TaskManager replacement for tests."""
 
     def __init__(self) -> None:
-        self.enqueued: list[tuple[str, dict, str | None]] = []
         self.enqueued_tasks: list[Task] = []
         self.status_by_id: dict[str, TaskStatus] = {}
 
-    async def enqueue(self, task_name: str, payload: dict, queue: str | None = None) -> str:
-        task_id = f"{task_name}-{len(self.enqueued) + 1}"
-        self.enqueued.append((task_name, payload, queue))
-        return task_id
-
-    async def enqueue_task(self, task: Task) -> str:
+    async def enqueue(self, task: Task) -> str:
         task_id = f"{task.task_type}-{len(self.enqueued_tasks) + 1}"
         self.enqueued_tasks.append(task)
         return task_id

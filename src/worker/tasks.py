@@ -26,7 +26,10 @@ def compute_pi(self, payload: dict) -> dict:
     Pi computation task.
     Simulates heavy pi calculation.
     """
-    digits: int = payload["digits"]
+    payload_data = payload.get("payload")
+    if payload_data is None:
+        payload_data = payload
+    digits: int = payload_data["digits"]
     pi: str = get_pi(digits)
 
     for k in range(digits):
@@ -66,4 +69,3 @@ def document_analysis(self, payload: dict) -> dict:
             "analysis": "documents analyzed",
         },
     }
-

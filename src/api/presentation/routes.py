@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from src.api.application.services import ProgressService, TaskService
-from src.api.domain.models import DocumentAnalysisPayload
+from src.api.domain.models import ComputePiPayload, DocumentAnalysisPayload
 from src.api.domain.exceptions import TaskNotFoundError
 from src.api.domain.models.task import Task
 from src.api.domain.models.task_status import TaskStatus
@@ -48,7 +48,8 @@ async def calculate_pi(body: CalculatePiRequest):
     Queues the `compute_pi` task.
     """
     try:
-        task_id = await _task_service.push_task("compute_pi", {"digits": body.n})
+        payload = ComputePiPayload(digits=body.n)
+        task_id = await _task_service.push_task("compute_pi", payload)
         return EnqueueResponse(task_id=task_id)
     except Exception as exc:
         logger.exception("Failed to enqueue task compute_pi: %s", exc)

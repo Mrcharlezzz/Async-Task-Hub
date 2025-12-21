@@ -11,3 +11,7 @@ class DocumentAnalysisPayload(TaskPayload):
     document_ids: list[str]
     run_ocr: bool = True
     language: str = "eng"
+
+
+class ComputePiPayload(TaskPayload):
+    digits: int

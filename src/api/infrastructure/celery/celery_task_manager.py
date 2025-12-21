@@ -21,16 +21,7 @@ class CeleryTaskManager(TaskManagerRepository):
         self._celery_app = celery_app_instance
         self._registry = TaskRegistry()
 
-    async def enqueue(self, task_name: str, payload: dict, queue: str | None = None) -> str:
-        """
-        Enqueue a task in the broker and return the task id.
-        """
-        async_result = await asyncio.to_thread(
-            self._celery_app.send_task, task_name, args=[payload], queue=queue
-        )
-        return async_result.id
-
-    async def enqueue_task(self, task: Task) -> str:
+    async def enqueue(self, task: Task) -> str:
         """
         Enqueue a task and return the task id.
         """

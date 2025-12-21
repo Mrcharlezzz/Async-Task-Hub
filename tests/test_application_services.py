@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+from src.api.domain.models import ComputePiPayload
 from src.api.domain.models.task_progress import TaskProgress
 from src.api.domain.models.task_state import TaskState
 from src.api.domain.models.task_status import TaskStatus
@@ -12,11 +13,14 @@ async def test_task_service_enqueue_uses_repository(stubbed_services):
     services_module, stub = stubbed_services
     service = services_module.TaskService()
 
-    payload = {"digits": 12}
+    payload = ComputePiPayload(digits=12)
     task_id = await service.push_task("compute_pi", payload)
 
     assert task_id == "compute_pi-1"
-    assert stub.enqueued == [("compute_pi", payload, None)]
+    assert len(stub.enqueued_tasks) == 1
+    enqueued = stub.enqueued_tasks[0]
+    assert enqueued.task_type == "compute_pi"
+    assert enqueued.payload == payload
 
 
 @pytest.mark.asyncio
