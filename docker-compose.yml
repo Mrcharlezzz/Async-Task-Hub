@@ -24,10 +24,17 @@ services:
     ports:
       - "8000:8000"
     command: >
-      uvicorn src.api.presentation.main:app
+      uvicorn src.app.presentation.main:app
       --host 0.0.0.0 --port 8000
     restart: unless-stopped
     networks: [posttager_net]
+
+  db:
+    image: postgres:16
+    env_file:
+      - .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
 
   worker:
     build:
@@ -39,7 +46,7 @@ services:
       redis:
         condition: service_healthy
     command: >
-      celery -A src.api.infrastructure.celery.app:celery_app
+      celery -A src.app.infrastructure.celery.app:celery_app
       worker -l ${LOG_LEVEL:-INFO} --concurrency=1
     restart: unless-stopped
     networks: [posttager_net]

@@ -26,7 +26,7 @@ COPY --from=builder /app /app
 
 EXPOSE 8000
 
-CMD ["uvicorn", "src.api.presentation.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "src.app.presentation.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # Worker runtime image
 FROM base AS worker
@@ -34,4 +34,4 @@ FROM base AS worker
 COPY --from=builder /usr/local /usr/local
 COPY --from=builder /app /app
 
-CMD ["celery", "-A", "src.api.infrastructure.celery.app:celery_app", "worker", "-l", "INFO", "--concurrency", "1"]
+CMD ["celery", "-A", "src.app.infrastructure.celery.app:celery_app", "worker", "-l", "INFO", "--concurrency", "1"]

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Protocol
 
 from src.app.domain.models.task import Task
@@ -9,6 +8,8 @@ from src.app.domain.models.task_state import TaskState
 from src.app.domain.models.task_status import TaskStatus
 from src.app.domain.models.task_type import TaskType
 from src.app.domain.models.task_result import TaskResult
+from src.app.domain.models.task_view import TaskView
+from datetime import datetime
 
 
 class TaskManagerRepository(Protocol):
@@ -19,16 +20,6 @@ class TaskManagerRepository(Protocol):
 
     async def get_status(self, task_id: str) -> TaskStatus:
         """Fetch the current status representation for the task identified by ``task_id``."""
-
-
-@dataclass(frozen=True, slots=True)
-class TaskSummary:
-    """Compact representation used for task listing screens."""
-
-    id: str
-    task_type: TaskType
-    status: TaskStatus
-    metadata: TaskMetadata
 
 
 class StorageRepository(Protocol):
@@ -44,6 +35,12 @@ class StorageRepository(Protocol):
     async def get_task(self, user_id: str, task_id: str) -> Task | None:
         """Return the task if owned by ``user_id``; otherwise ``None``."""
 
+    async def get_status(self, user_id: str, task_id: str) -> TaskStatus:
+        """Return the status for a task owned by ``user_id``."""
+
+    async def get_result(self, user_id: str, task_id: str) -> TaskResult:
+        """Return the result payload for a task owned by ``user_id``."""
+
     async def list_tasks(
         self,
         user_id: str,
@@ -52,7 +49,7 @@ class StorageRepository(Protocol):
         state: TaskState | None = None,
         limit: int = 50,
         offset: int = 0,
-    ) -> list[TaskSummary]:
+    ) -> list[TaskView]:
         """List tasks owned by ``user_id`` with optional filters."""
 
     async def update_task_status(

@@ -4,10 +4,11 @@ from src.app.domain.models.payloads import ComputePiPayload, DocumentAnalysisPay
 from src.app.domain.models.task import Task
 from src.app.domain.models.task_metadata import TaskMetadata
 from src.app.domain.models.task_progress import TaskProgress
-from src.app.domain.models.task_result import TaskResult, TaskResultMetadata
+from src.app.domain.models.task_result import TaskResult
 from src.app.domain.models.task_state import TaskState
 from src.app.domain.models.task_status import TaskStatus
 from src.app.domain.models.task_type import TaskType
+from src.app.domain.models.task_view import TaskView
 
 __all__ = [
     "Task",
@@ -21,6 +22,6 @@ __all__ = [
     "ExecutionConfig",
     "TaskMetadata",
     "TaskResult",
-    "TaskResultMetadata",
+    "TaskView",
     "StatusDTO",
 ]

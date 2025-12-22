@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
-from src.setup.api_config import configure_di, get_api_settings
+from src.setup.api_config import get_api_settings
+from src.setup.app_config import configure_di
 
 # Configure DI once at process start
 _settings = get_api_settings()

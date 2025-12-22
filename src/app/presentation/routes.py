@@ -3,7 +3,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from src.app.application.services import ProgressService, ResultService, TaskService
+from src.app.application.services import TaskService
 from src.app.domain.models import (
     ComputePiPayload,
     DocumentAnalysisPayload,
@@ -22,8 +22,6 @@ logger = logging.getLogger(__name__)
 _settings = get_api_settings()
 
 _task_service = TaskService()
-_progress_service = ProgressService()
-_result_service = ResultService()
 
 
 def get_task_service() -> TaskService:
@@ -82,7 +80,7 @@ async def check_progress(task_id: str = Query(..., description="Celery task id")
     Reads the Celery result backend for the given task id.
     """
     try:
-        status = await _progress_service.get_progress(task_id)
+        status = await _task_service.get_status(task_id)
         return status
     except TaskNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -125,7 +123,7 @@ async def get_task_result(task_id: str = Query(..., description="Celery task id"
     Reads the Celery result backend for the given task id.
     """
     try:
-        result = await _result_service.get_result(task_id)
+        result = await _task_service.get_result(task_id)
         return result
     except TaskNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc

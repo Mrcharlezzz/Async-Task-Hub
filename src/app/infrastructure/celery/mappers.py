@@ -2,15 +2,15 @@ from celery.result import AsyncResult
 
 from src.app.domain.exceptions import TaskNotFoundError
 from src.app.domain.models.task_metadata import TaskMetadata
-from src.app.domain.models.task_result import TaskResult, TaskResultMetadata
+from src.app.domain.models.task_result import TaskResult
 from src.app.domain.models.task_progress import TaskProgress
 from src.app.domain.models.task_state import TaskState
 from src.app.domain.models.task_status import TaskStatus
 
 
-class CeleryMapper:
+class OrmMapper:
     @staticmethod
-    def map_meta(async_result: AsyncResult) -> dict:
+    def to_meta(async_result: AsyncResult) -> dict:
         info = async_result.info
         if isinstance(info, dict):
             return info
@@ -19,7 +19,7 @@ class CeleryMapper:
         return {}
 
     @staticmethod
-    def map_state(async_result: AsyncResult) -> TaskState:
+    def to_state(async_result: AsyncResult) -> TaskState:
         if async_result.state == "PENDING":
             raise TaskNotFoundError(async_result.id)
         if async_result.state == "SENT":
@@ -35,7 +35,7 @@ class CeleryMapper:
         return TaskState.RUNNING
 
     @staticmethod
-    def map_message(info: object) -> str | None:
+    def to_message(info: object) -> str | None:
         if isinstance(info, dict):
             return info.get("message")
         if info is None:
@@ -43,9 +43,9 @@ class CeleryMapper:
         return str(info)
 
     @staticmethod
-    def map_status(async_result: AsyncResult) -> TaskStatus:
+    def to_status(async_result: AsyncResult) -> TaskStatus:
         info = async_result.info
-        meta = CeleryMapper.map_meta(async_result)
+        meta = OrmMapper.to_meta(async_result)
 
         progress_value = meta.get("progress")
         progress = (
@@ -55,17 +55,17 @@ class CeleryMapper:
         )
 
         return TaskStatus(
-            state=CeleryMapper.map_state(async_result),
+            state=OrmMapper.to_state(async_result),
             progress=progress,
-            message=CeleryMapper.map_message(info),
+            message=OrmMapper.to_message(info),
         )
 
     @staticmethod
-    def map_result(async_result: AsyncResult) -> TaskResult:
+    def to_result(async_result: AsyncResult) -> TaskResult:
         if async_result.state == "PENDING":
             raise TaskNotFoundError(async_result.id)
 
-        meta = CeleryMapper.map_meta(async_result)
+        meta = OrmMapper.to_meta(async_result)
         result_payload = async_result.result if async_result.result is not None else meta or None
 
         created_at = meta.get("created_at") if isinstance(meta, dict) else None
@@ -75,12 +75,6 @@ class CeleryMapper:
         )
         if finished_at is None:
             finished_at = async_result.date_done
-
-        metadata = TaskResultMetadata(
-            worker=meta.get("worker") if isinstance(meta, dict) else None,
-            queue=meta.get("queue") if isinstance(meta, dict) else None,
-            trace_id=meta.get("trace_id") if isinstance(meta, dict) else None,
-        )
 
         task_metadata = TaskMetadata(
             created_at=created_at,
@@ -93,5 +87,4 @@ class CeleryMapper:
             task_id=async_result.id,
             task_metadata=task_metadata,
             data=result_payload,
-            metadata=metadata,
         )
