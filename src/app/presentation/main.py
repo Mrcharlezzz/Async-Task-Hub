@@ -13,6 +13,6 @@ app = FastAPI(
 )
 
 # Instantiate services AFTER configure_di()
-from src.api.presentation.routes import router as api_router  # noqa: E402
+from src.app.presentation.routes import router as api_router  # noqa: E402
 
 app.include_router(api_router, prefix="")

@@ -1,0 +1,72 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Protocol
+
+from src.app.domain.models.task import Task
+from src.app.domain.models.task_metadata import TaskMetadata
+from src.app.domain.models.task_state import TaskState
+from src.app.domain.models.task_status import TaskStatus
+from src.app.domain.models.task_type import TaskType
+from src.app.domain.models.task_result import TaskResult
+
+
+class TaskManagerRepository(Protocol):
+    """Repository contract for enqueueing tasks and retrieving their status."""
+
+    async def enqueue(self, task: Task) -> str:
+        """Schedule a task and return its identifier."""
+
+    async def get_status(self, task_id: str) -> TaskStatus:
+        """Fetch the current status representation for the task identified by ``task_id``."""
+
+
+@dataclass(frozen=True, slots=True)
+class TaskSummary:
+    """Compact representation used for task listing screens."""
+
+    id: str
+    task_type: TaskType
+    status: TaskStatus
+    metadata: TaskMetadata
+
+
+class StorageRepository(Protocol):
+    """Repository contract for task persistence and access control."""
+
+    async def create_task(
+        self,
+        user_id: str,
+        task: Task,
+    ) -> str:
+        """Persist a new task owned by ``user_id`` and return its id."""
+
+    async def get_task(self, user_id: str, task_id: str) -> Task | None:
+        """Return the task if owned by ``user_id``; otherwise ``None``."""
+
+    async def list_tasks(
+        self,
+        user_id: str,
+        *,
+        task_type: TaskType | None = None,
+        state: TaskState | None = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> list[TaskSummary]:
+        """List tasks owned by ``user_id`` with optional filters."""
+
+    async def update_task_status(
+        self,
+        task_id: str,
+        status: TaskStatus,
+        metadata: TaskMetadata | None = None,
+    ) -> None:
+        """Persist status changes and optional metadata updates."""
+
+    async def set_task_result(
+        self,
+        task_id: str,
+        result: TaskResult,
+        finished_at: datetime | None = None,
+    ) -> None:
+        """Persist the task result payload and finalization timestamp."""

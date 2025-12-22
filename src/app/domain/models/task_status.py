@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
-from src.api.domain.models.task_progress import TaskProgress
-from src.api.domain.models.task_state import TaskState
+from src.app.domain.models.task_progress import TaskProgress
+from src.app.domain.models.task_state import TaskState
 
 
 class TaskStatus(BaseModel):

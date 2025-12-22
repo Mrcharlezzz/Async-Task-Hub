@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from src.api.domain.models.task_type import TaskType
+from src.app.domain.models.task_type import TaskType
 
 
 @dataclass(frozen=True)

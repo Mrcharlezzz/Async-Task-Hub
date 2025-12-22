@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from src.api.domain.models.task_progress import TaskProgress
-from src.api.domain.models.task_state import TaskState
-from src.api.domain.models.task_status import TaskStatus
-from src.api.infrastructure.celery.mappers import CeleryMapper
+from src.app.domain.models.task_progress import TaskProgress
+from src.app.domain.models.task_state import TaskState
+from src.app.domain.models.task_status import TaskStatus
+from src.app.infrastructure.celery.mappers import CeleryMapper
 
 
 class DummyAsyncResult:

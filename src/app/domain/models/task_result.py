@@ -5,7 +5,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from src.api.domain.models.task_metadata import TaskMetadata
+from src.app.domain.models.task_metadata import TaskMetadata
 
 
 class TaskResultMetadata(BaseModel):

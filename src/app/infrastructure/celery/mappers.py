@@ -1,11 +1,11 @@
 from celery.result import AsyncResult
 
-from src.api.domain.exceptions import TaskNotFoundError
-from src.api.domain.models.task_metadata import TaskMetadata
-from src.api.domain.models.task_result import TaskResult, TaskResultMetadata
-from src.api.domain.models.task_progress import TaskProgress
-from src.api.domain.models.task_state import TaskState
-from src.api.domain.models.task_status import TaskStatus
+from src.app.domain.exceptions import TaskNotFoundError
+from src.app.domain.models.task_metadata import TaskMetadata
+from src.app.domain.models.task_result import TaskResult, TaskResultMetadata
+from src.app.domain.models.task_progress import TaskProgress
+from src.app.domain.models.task_state import TaskState
+from src.app.domain.models.task_status import TaskStatus
 
 
 class CeleryMapper:

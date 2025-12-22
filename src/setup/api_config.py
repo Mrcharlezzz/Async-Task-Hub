@@ -3,8 +3,8 @@ import inject
 from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
-from src.api.domain.repositories import TaskManagerRepository
-from src.api.infrastructure.celery.celery_task_manager import CeleryTaskManager
+from src.app.domain.repositories import TaskManagerRepository
+from src.app.infrastructure.celery.celery_task_manager import CeleryTaskManager
 
 
 class ApiSettings(BaseSettings):

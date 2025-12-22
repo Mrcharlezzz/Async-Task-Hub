@@ -7,11 +7,11 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from src.api.domain.exceptions import TaskNotFoundError
-from src.api.domain.models.task import Task
-from src.api.domain.models.task_result import TaskResult
-from src.api.domain.models.task_status import TaskStatus
-from src.api.domain.repositories import TaskManagerRepository
+from src.app.domain.exceptions import TaskNotFoundError
+from src.app.domain.models.task import Task
+from src.app.domain.models.task_result import TaskResult
+from src.app.domain.models.task_status import TaskStatus
+from src.app.domain.repositories import TaskManagerRepository
 
 
 class StubTaskManager(TaskManagerRepository):
@@ -67,7 +67,7 @@ def stubbed_services(env_settings: None, monkeypatch: pytest.MonkeyPatch):
     stub = StubTaskManager()
     _patch_inject_instance(monkeypatch, stub)
 
-    services_module = importlib.reload(importlib.import_module("src.api.application.services"))
+    services_module = importlib.reload(importlib.import_module("src.app.application.services"))
     return services_module, stub
 
 
@@ -78,8 +78,8 @@ def api_client(env_settings: None, monkeypatch: pytest.MonkeyPatch):
     _patch_inject_instance(monkeypatch, stub)
 
     # Reload modules so module-level singletons pick up the patched injector.
-    services_module = importlib.reload(importlib.import_module("src.api.application.services"))  # noqa: F841
-    routes_module = importlib.reload(importlib.import_module("src.api.presentation.routes"))
+    services_module = importlib.reload(importlib.import_module("src.app.application.services"))  # noqa: F841
+    routes_module = importlib.reload(importlib.import_module("src.app.presentation.routes"))
 
     app = FastAPI()
     app.include_router(routes_module.router)

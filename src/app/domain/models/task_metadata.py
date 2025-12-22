@@ -10,6 +10,9 @@ class TaskMetadata(BaseModel):
     created_at: datetime | None = Field(
         default=None, description="Timestamp when the task was created."
     )
+    updated_at: datetime | None = Field(
+        default=None, description="Timestamp when the task metadata was last updated."
+    )
     started_at: datetime | None = Field(
         default=None, description="Timestamp when the task started running."
     )

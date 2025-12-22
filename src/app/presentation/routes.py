@@ -3,16 +3,16 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from src.api.application.services import ProgressService, ResultService, TaskService
-from src.api.domain.models import (
+from src.app.application.services import ProgressService, ResultService, TaskService
+from src.app.domain.models import (
     ComputePiPayload,
     DocumentAnalysisPayload,
     TaskResult,
     TaskType,
 )
-from src.api.domain.exceptions import TaskNotFoundError
-from src.api.domain.models.task import Task
-from src.api.domain.models.task_status import TaskStatus
+from src.app.domain.exceptions import TaskNotFoundError
+from src.app.domain.models.task import Task
+from src.app.domain.models.task_status import TaskStatus
 from src.setup.api_config import get_api_settings
 
 router = APIRouter(tags=["tasks"])

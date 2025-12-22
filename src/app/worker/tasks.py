@@ -4,13 +4,13 @@ from typing import Any
 
 from mpmath import mp
 
-from src.api.infrastructure.celery.app import celery_app
+from src.app.infrastructure.celery.app import celery_app
 from src.setup.worker_config import get_worker_settings
 
 _settings = get_worker_settings()
 
 celery_app.autodiscover_tasks(
-    packages=["src.worker"],
+    packages=["src.app.worker"],
     related_name="tasks",
     force=True,
 )

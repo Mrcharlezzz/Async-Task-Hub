@@ -1,6 +1,6 @@
 import inject
 from datetime import datetime, timezone
-from src.api.domain.models import (
+from src.app.domain.models import (
     Task,
     TaskMetadata,
     TaskPayload,
@@ -10,7 +10,7 @@ from src.api.domain.models import (
     TaskStatus,
     TaskType,
 )
-from src.api.domain.repositories import TaskManagerRepository
+from src.app.domain.repositories import TaskManagerRepository
 
 
 class ProgressService:
