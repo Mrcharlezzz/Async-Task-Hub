@@ -5,7 +5,7 @@ from typing import Any
 from src.app.domain.models.task_progress import TaskProgress
 from src.app.domain.models.task_state import TaskState
 from src.app.domain.models.task_status import TaskStatus
-from src.app.infrastructure.celery.mappers import CeleryMapper
+from src.app.infrastructure.celery.mappers import OrmMapper
 
 
 class DummyAsyncResult:
@@ -41,7 +41,7 @@ def test_to_status_dto_maps_failure_result():
         successful=False,
     )
 
-    dto = CeleryMapper.map_status(result)
+    dto = OrmMapper.to_status(result)
 
     assert dto == TaskStatus(
         state=TaskState.FAILED,
@@ -60,7 +60,7 @@ def test_to_status_dto_maps_successful_result():
         successful=True,
     )
 
-    dto = CeleryMapper.map_status(result)
+    dto = OrmMapper.to_status(result)
 
     assert dto == TaskStatus(
         state=TaskState.COMPLETED,

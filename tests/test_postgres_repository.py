@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 import pytest
+import pytest_asyncio
 
 from src.app.domain.exceptions import TaskAccessDeniedError
 from src.app.domain.models.payloads import ComputePiPayload
@@ -17,7 +18,7 @@ from src.app.infrastructure.postgres.orm import Base, PostgresOrm
 from src.app.infrastructure.postgres.repositories import PostgresStorageRepository
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def repo(tmp_path):
     db_path = tmp_path / "test.db"
     orm = PostgresOrm(f"sqlite+aiosqlite:///{db_path}")

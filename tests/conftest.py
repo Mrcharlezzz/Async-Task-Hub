@@ -151,4 +151,4 @@ def api_client(env_settings: None, monkeypatch: pytest.MonkeyPatch):
     app = FastAPI()
     app.include_router(routes_module.router)
     client = TestClient(app)
-    return client, task_stub
+    return client, task_stub, storage_stub
