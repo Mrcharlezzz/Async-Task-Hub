@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, SerializeAsAny
 
 from src.app.domain.models.execution_config import ExecutionConfig
 from src.app.domain.models.payloads import TaskPayload
@@ -10,7 +10,9 @@ from src.app.domain.models.task_type import TaskType
 class Task(BaseModel):
     id: str | None = Field(default=None, description="Unique task identifier.")
     task_type: TaskType = Field(description="Type of task being executed.")
-    payload: TaskPayload = Field(description="Task-specific payload data.")
+    payload: SerializeAsAny[TaskPayload] = Field(
+        description="Task-specific payload data."
+    )
     result: dict | None = Field(
         default=None, description="Raw result payload, if available."
     )
