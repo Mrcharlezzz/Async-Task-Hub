@@ -22,6 +22,15 @@ COPY src ./src
 RUN pip install --upgrade pip \
  && pip install --no-cache-dir .
 
+# Test image with optional dependencies.
+FROM base AS test
+
+COPY pyproject.toml README.md ./
+COPY src ./src
+
+RUN pip install --upgrade pip \
+ && pip install --no-cache-dir ".[test]"
+
 # API runtime image.
 FROM base AS api
 

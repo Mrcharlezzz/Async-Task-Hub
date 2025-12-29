@@ -9,8 +9,6 @@ from pydantic import ValidationError
 from src.app.domain.events.task_event import EventType, TaskEvent
 
 def _as_str(value: Any) -> str:
-    if isinstance(value, bytes):
-        return value.decode("utf-8")
     return str(value)
 
 

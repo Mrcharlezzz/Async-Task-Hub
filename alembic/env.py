@@ -13,7 +13,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.app.infrastructure.postgres.orm import Base  # noqa: E402
-from src.setup.db_config import get_database_settings  # noqa: E402
+from src.setup.db_config import DatabaseSettings  # noqa: E402
 
 config = context.config
 
@@ -24,7 +24,7 @@ target_metadata = Base.metadata
 
 
 def _get_db_url() -> str:
-    return get_database_settings().DATABASE_URL
+    return DatabaseSettings().DATABASE_URL
 
 
 def do_run_migrations(connection) -> None:

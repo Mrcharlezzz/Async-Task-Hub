@@ -24,7 +24,7 @@ class StreamsClient:
             socket_timeout=socket_timeout,
             socket_connect_timeout=socket_connect_timeout,
             retry_on_timeout=retry_on_timeout,
-            decode_responses=False,
+            decode_responses=True,
         )
         self._redis = Redis(connection_pool=pool)
 
