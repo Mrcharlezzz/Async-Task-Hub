@@ -21,7 +21,7 @@ async def test_streams_consumer_dispatches_events() -> None:
     if not redis_url:
         pytest.skip("REDIS_URL not set; skipping streams integration test.")
 
-    stream_name = f"test:events:{uuid4().hex}"
+    stream_name = f"test:events:{uuid4().hex}"  # Unique stream per test avoids collisions.
     group = "test-group"
     consumer_name = f"test-consumer-{uuid4().hex}"
     task_id = uuid4().hex
