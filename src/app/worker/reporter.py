@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 from typing import Any
 
 import inject
@@ -34,9 +33,4 @@ class TaskReporter:
         self._publish(event)
 
     def _publish(self, event: TaskEvent) -> None:
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            asyncio.run(self._publisher.publish(event))
-            return
-        loop.create_task(self._publisher.publish(event))
+        self._publisher.publish(event)

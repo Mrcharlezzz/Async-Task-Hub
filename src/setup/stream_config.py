@@ -10,18 +10,18 @@ from src.app.application.handlers import (
 )
 from src.app.domain.events.task_event import EventType
 from src.app.domain.repositories import TaskEventPublisherRepository
-from src.app.infrastructure.streams.client import StreamsClient
+from src.app.infrastructure.streams.client import StreamsClient, SyncStreamsClient
 from src.app.infrastructure.streams.consumer import (
     GROUP_API,
     STREAM_TASK_EVENTS,
     StreamsConsumer,
     consumer_name,
 )
-from src.app.infrastructure.streams.publisher import StreamsPublisher
+from src.app.infrastructure.streams.publisher import StreamsPublisher, StreamsSyncPublisher
 from src.app.infrastructure.streams.router import EventRouter
 
 _stream_consumer: StreamsConsumer | None = None
-_stream_publisher: StreamsPublisher | None = None
+_stream_publisher: StreamsSyncPublisher | None = None
 
 
 class StreamSettings(BaseSettings):
@@ -64,14 +64,14 @@ def build_stream_consumer(settings: StreamSettings | None = None) -> StreamsCons
     )
 
 
-def build_stream_publisher(settings: StreamSettings | None = None) -> StreamsPublisher:
+def build_stream_publisher(settings: StreamSettings | None = None) -> StreamsSyncPublisher:
     if settings is None:
         settings = StreamSettings()
-    client = StreamsClient(settings.REDIS_URL)
-    return StreamsPublisher(client, settings.STREAM_NAME)
+    client = SyncStreamsClient(settings.REDIS_URL)
+    return StreamsSyncPublisher(client, settings.STREAM_NAME)
 
 
-def configure_stream_publisher(settings: StreamSettings | None = None) -> StreamsPublisher:
+def configure_stream_publisher(settings: StreamSettings | None = None) -> StreamsSyncPublisher:
     global _stream_publisher
     if _stream_publisher is None:
         _stream_publisher = build_stream_publisher(settings)

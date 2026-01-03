@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import logging
 
+from redis import ConnectionPool as SyncConnectionPool
+from redis import Redis as SyncRedis
 from redis.asyncio import ConnectionPool, Redis
 from redis.exceptions import ResponseError
 
@@ -59,3 +61,31 @@ class StreamsClient:
 
     async def close(self) -> None:
         await self._redis.close()
+
+
+class SyncStreamsClient:
+    def __init__(
+        self,
+        url: str,
+        *,
+        max_connections: int = 10,
+        socket_timeout: float = 5.0,
+        socket_connect_timeout: float = 5.0,
+        retry_on_timeout: bool = True,
+    ) -> None:
+        pool = SyncConnectionPool.from_url(
+            url,
+            max_connections=max_connections,
+            socket_timeout=socket_timeout,
+            socket_connect_timeout=socket_connect_timeout,
+            retry_on_timeout=retry_on_timeout,
+            decode_responses=True,
+        )
+        self._redis = SyncRedis(connection_pool=pool)
+
+    @property
+    def redis(self) -> SyncRedis:
+        return self._redis
+
+    def close(self) -> None:
+        self._redis.close()

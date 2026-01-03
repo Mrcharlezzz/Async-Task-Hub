@@ -73,5 +73,5 @@ class StorageRepository(Protocol):
 class TaskEventPublisherRepository(Protocol):
     """Repository contract for publishing task events to a stream."""
 
-    async def publish(self, events: TaskEvent | Sequence[TaskEvent]) -> None:
+    def publish(self, events: TaskEvent | Sequence[TaskEvent]) -> None:
         """Publish task event(s) to the stream."""

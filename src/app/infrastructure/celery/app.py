@@ -2,10 +2,8 @@ from celery import Celery
 from celery.signals import after_task_publish
 
 from src.setup.celery_config import get_celery_settings
-from src.setup.stream_config import configure_stream_publisher
 
 _settings = get_celery_settings()
-configure_stream_publisher()
 
 celery_app = Celery(
     "posttagger",
