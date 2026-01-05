@@ -3,11 +3,7 @@ import inject
 from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
-from src.app.application.handlers import (
-    handle_result_chunk_event,
-    handle_result_event,
-    handle_status_event,
-)
+from src.app.application.handlers import TaskEventHandler
 from src.app.domain.events.task_event import EventType
 from src.app.domain.repositories import TaskEventPublisherRepository
 from src.app.infrastructure.streams.client import StreamsClient, SyncStreamsClient
@@ -39,9 +35,10 @@ class StreamSettings(BaseSettings):
 
 def build_event_router() -> EventRouter:
     router = EventRouter()
-    router.register(EventType.TASK_STATUS, handle_status_event)
-    router.register(EventType.TASK_RESULT, handle_result_event)
-    router.register(EventType.TASK_RESULT_CHUNK, handle_result_chunk_event)
+    handler = TaskEventHandler()
+    router.register(EventType.TASK_STATUS, handler.handle_status_event)
+    router.register(EventType.TASK_RESULT, handler.handle_result_event)
+    router.register(EventType.TASK_RESULT_CHUNK, handler.handle_result_chunk_event)
     return router
 
 

@@ -1,5 +1,6 @@
 import pytest
 
+from src.app.application.broadcaster import TaskStatusBroadcaster
 from src.app.application.handlers import handle_result_event, handle_status_event
 from src.app.domain.events.task_event import TaskEvent
 from src.app.domain.models.task_progress import TaskProgress
@@ -38,10 +39,23 @@ class StubStorage(StorageRepository):
 @pytest.mark.asyncio
 async def test_handle_status_event_updates_storage(monkeypatch: pytest.MonkeyPatch) -> None:
     storage = StubStorage()
+    broadcaster_calls: list[object] = []
 
     import inject
 
-    monkeypatch.setattr(inject, "instance", lambda interface: storage)
+    def fake_instance(interface: object):
+        if interface is StorageRepository:
+            return storage
+        if interface is TaskStatusBroadcaster:
+            async def _broadcast(event):
+                broadcaster_calls.append(event)
+            class _Broadcaster:
+                async def broadcast_status(self, event):
+                    await _broadcast(event)
+            return _Broadcaster()
+        raise RuntimeError(f"Unexpected dependency request: {interface}")
+
+    monkeypatch.setattr(inject, "instance", fake_instance)
 
     status = TaskStatus(
         state=TaskState.RUNNING,
@@ -53,6 +67,7 @@ async def test_handle_status_event_updates_storage(monkeypatch: pytest.MonkeyPat
     await handle_status_event(event)
 
     assert storage.status_calls == [("task-1", status)]
+    assert broadcaster_calls == [event]
 
 
 @pytest.mark.asyncio
@@ -61,7 +76,17 @@ async def test_handle_result_event_updates_storage(monkeypatch: pytest.MonkeyPat
 
     import inject
 
-    monkeypatch.setattr(inject, "instance", lambda interface: storage)
+    def fake_instance(interface: object):
+        if interface is StorageRepository:
+            return storage
+        if interface is TaskStatusBroadcaster:
+            class _Broadcaster:
+                async def broadcast_status(self, event):
+                    return None
+            return _Broadcaster()
+        raise RuntimeError(f"Unexpected dependency request: {interface}")
+
+    monkeypatch.setattr(inject, "instance", fake_instance)
 
     payload = {"task_id": "task-2", "data": {"value": 42}}
     event = TaskEvent.result("task-2", payload)
