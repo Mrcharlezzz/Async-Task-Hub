@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>PostTagger Demo — Streaming vs Polling</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Redis Streams + WebSockets Demo</p>
+          <h1>Streaming Beats Polling</h1>
+          <p class="subtitle">
+            Same task. Same time. Two clients. Watch how the architecture changes the experience.
+          </p>
+        </div>
+        <form id="controls" class="controls">
+          <label class="field">
+            <span>Digits</span>
+            <input id="digits" type="number" min="50" max="1000" value="500" />
+          </label>
+          <label class="field">
+            <span>Polling Interval (ms)</span>
+            <input id="poll-interval" type="number" min="50" max="1000" value="150" />
+          </label>
+          <button id="run" type="submit">Run Demo</button>
+          <p id="run-status" class="run-status">Idle</p>
+        </form>
+      </header>
+
+      <section class="panels">
+        <article class="panel panel-streaming">
+          <header>
+            <h2>Streaming</h2>
+            <p>WebSocket + Redis Streams</p>
+          </header>
+          <div class="progress">
+            <div class="progress-bar" data-panel="streaming"></div>
+          </div>
+          <div class="result" data-panel="streaming"></div>
+          <dl class="metrics" data-panel="streaming"></dl>
+        </article>
+
+        <article class="panel panel-polling">
+          <header>
+            <h2>Naive Polling</h2>
+            <p>Worst-practice baseline</p>
+          </header>
+          <div class="progress">
+            <div class="progress-bar" data-panel="polling"></div>
+          </div>
+          <div class="result" data-panel="polling"></div>
+          <dl class="metrics" data-panel="polling"></dl>
+        </article>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -27,6 +27,7 @@ services:
     restart: unless-stopped
     volumes:
       - .:/app
+      - naive_data:/data
     networks: [posttager_net]
 
   db:
@@ -53,6 +54,30 @@ services:
       - .:/app
     networks: [posttager_net]
 
+  naive_demo_worker:
+    build:
+      context: .
+      target: api
+    container_name: posttager_naive_demo_worker
+    command: >
+      python -m src.naive.worker
+    volumes:
+      - .:/app
+      - naive_data:/data
+    networks: [posttager_net]
+
+  demo:
+    image: nginx:alpine
+    container_name: posttager_demo
+    depends_on:
+      - api
+    ports:
+      - "8080:80"
+    volumes:
+      - ./demo:/usr/share/nginx/html:ro
+      - ./demo/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks: [posttager_net]
+
   tests:
     profiles: ["test"]
     build:
@@ -77,3 +102,4 @@ networks:
 
 volumes:
   pgdata:
+  naive_data:
