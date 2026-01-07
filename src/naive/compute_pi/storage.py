@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import json
 import sqlite3
 from dataclasses import dataclass
-import json
 from datetime import datetime, timezone
 
 
@@ -24,7 +24,7 @@ class NaiveTaskRow:
     updated_at: str
 
 
-class NaiveStore:
+class ComputePiStore:
     def __init__(self, db_path: str) -> None:
         self._db_path = db_path
 
@@ -130,8 +130,7 @@ class NaiveStore:
                 """
                 UPDATE naive_tasks
                 SET progress_current = ?, progress_total = ?, result = ?,
-                    done = ?, status = ?, updated_at = ?,
-                    metrics = ?
+                    done = ?, status = ?, updated_at = ?, metrics = ?
                 WHERE task_id = ?
                 """,
                 (

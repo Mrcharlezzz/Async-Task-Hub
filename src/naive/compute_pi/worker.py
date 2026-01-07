@@ -5,7 +5,7 @@ import time
 
 from mpmath import mp
 
-from src.naive.storage import NaiveStore
+from src.naive.compute_pi.storage import ComputePiStore
 
 
 def _compute_pi(digits: int) -> str:
@@ -17,7 +17,7 @@ def main() -> None:
     db_path = "/data/naive.sqlite"
     idle_sleep = 0.2
 
-    store = NaiveStore(db_path)
+    store = ComputePiStore(db_path)
     store.init_db()
 
     while True:

@@ -8,14 +8,9 @@ class TaskPayload(BaseModel):
 
 
 class DocumentAnalysisPayload(TaskPayload):
-    document_ids: list[str] = Field(
-        description="IDs of documents to analyze."
-    )
-    run_ocr: bool = Field(
-        default=True, description="Whether to run OCR before analysis."
-    )
-    language: str = Field(
-        default="eng", description="OCR language code."
+    document_path: str = Field(description="Local path to the document to analyze.")
+    keywords: list[str] = Field(
+        description="Keywords to search for (case-insensitive substring match)."
     )
 
 
