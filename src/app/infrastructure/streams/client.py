@@ -60,7 +60,7 @@ class StreamsClient:
             raise
 
     async def close(self) -> None:
-        await self._redis.close()
+        await self._redis.aclose()
 
 
 class SyncStreamsClient:
