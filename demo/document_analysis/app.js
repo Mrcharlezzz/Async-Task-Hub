@@ -217,7 +217,7 @@ class StreamingEngine {
       this.state.statusMetrics = status?.metrics ?? null;
       const meta = status?.metadata;
       if (meta?.server_sent_ts) {
-        const latencyMs = performance.now() - meta.server_sent_ts * 1000;
+        const latencyMs = Date.now() - meta.server_sent_ts * 1000;
         this.state.metrics.latencyTotalMs += latencyMs;
         this.state.metrics.latencyCount += 1;
       }

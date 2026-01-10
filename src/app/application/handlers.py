@@ -25,11 +25,12 @@ def ws_cpu_meter(func):
             elapsed_ms = (time.process_time() - start) * 1000
             total_ms = self._cpu_ws_total_ms.get(event.task_id, 0.0) + elapsed_ms
             self._cpu_ws_total_ms[event.task_id] = total_ms
-            status_payload = event.payload.get("status")
-            if isinstance(status_payload, dict):
-                state = status_payload.get("state")
-                if state in _TERMINAL_STATES:
-                    self._cpu_ws_total_ms.pop(event.task_id, None)
+            if event.type == event.type.TASK_STATUS:
+                status_payload = event.payload.get("status")
+                if isinstance(status_payload, dict):
+                    state = status_payload.get("state")
+                    if state in _TERMINAL_STATES:
+                        self._cpu_ws_total_ms.pop(event.task_id, None)
 
     return wrapper
 
@@ -82,6 +83,7 @@ class TaskEventHandler:
             result = TaskResult(task_id=event.task_id, data=result_payload)
         await self._storage.set_task_result(event.task_id, result)
 
+    @ws_cpu_meter
     async def handle_result_chunk_event(self, event: TaskEvent) -> None:
         payload = event.payload
         if not isinstance(payload, dict):
