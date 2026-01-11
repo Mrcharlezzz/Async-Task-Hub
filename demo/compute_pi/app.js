@@ -195,9 +195,13 @@ class StreamingEngine {
     }
     if (message.type === "task.result_chunk") {
       const payload = message.payload;
-      const data = Array.isArray(payload?.data) ? payload.data : [];
-      if (data.length) {
-        this.state.result += data.join("");
+      const payloadData = payload?.data;
+      if (Array.isArray(payloadData)) {
+        if (payloadData.length) {
+          this.state.result += payloadData.join("");
+        }
+      } else if (typeof payloadData === "string" && payloadData) {
+        this.state.result += payloadData;
       }
       if (payload?.is_last) {
         this.state.completed = true;
