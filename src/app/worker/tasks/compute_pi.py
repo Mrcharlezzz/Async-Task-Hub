@@ -33,7 +33,7 @@ def compute_pi(self, payload: dict) -> dict:
     start_time = time.monotonic()
     with reporter.report_result_chunk(batch_size=1) as chunks:
         for k, digit in enumerate(pi):
-            sleep_time = random.uniform(0.005, 1.5)
+            sleep_time = random.uniform(0.1, 0.5)
             done = k + 1
             progress = done / total if total else 1.0
             remaining = total - done

@@ -31,7 +31,8 @@ def main() -> None:
         result = ""
         start_time = time.monotonic()
         for idx, char in enumerate(pi_value, start=1):
-            sleep_time = random.uniform(0.005, 1.5)
+            sleep_time = random.uniform(0.1, 0.5)
+            time.sleep(sleep_time)
             result += char
             remaining = total - idx
             elapsed = time.monotonic() - start_time
@@ -50,7 +51,6 @@ def main() -> None:
                     "digits_total": total,
                 },
             )
-            time.sleep(sleep_time)
 
         store.update_progress(
             task.task_id,
