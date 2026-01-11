@@ -75,7 +75,7 @@ class ApiClient {
     return data.id;
   }
 
-  async startNaiveDocumentAnalysis(taskId, documentPath, documentUrl, keywords) {
+  async startNaiveDocumentAnalysis(taskId, documentPath, documentUrl, keywords, demo = false) {
     const res = await fetch(`${API_BASE}/naive/document-analysis`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -84,6 +84,7 @@ class ApiClient {
         document_path: documentPath,
         document_url: documentUrl,
         keywords,
+        demo,
       }),
     });
     if (!res.ok) {
@@ -541,7 +542,8 @@ async function runDemo(event) {
       taskId,
       documentPath || null,
       documentUrl || null,
-      keywords
+      keywords,
+      true
     );
     log("info", "Naive task created", { taskId });
 

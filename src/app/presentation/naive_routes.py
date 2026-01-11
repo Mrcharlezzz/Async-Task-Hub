@@ -19,6 +19,7 @@ _CPU_MS_NAIVE: dict[str, float] = {}
 class NaivePiRequest(BaseModel):
     digits: int = Field(..., ge=1, le=2000)
     task_id: str | None = None
+    demo: bool = False
 
 
 class NaiveDocRequest(BaseModel):
@@ -30,6 +31,7 @@ class NaiveDocRequest(BaseModel):
     )
     keywords: list[str] = Field(..., description="Keywords to search for.")
     task_id: str | None = None
+    demo: bool = False
 
 
 def _compute_store() -> ComputePiStore:
@@ -57,7 +59,7 @@ def naive_calculate_pi(body: NaivePiRequest):
     store = _compute_store()
     task_id = body.task_id or uuid4().hex
     if store.get_task(task_id) is None:
-        store.create_task(task_id, body.digits)
+        store.create_task(task_id, body.digits, demo=body.demo)
     return {"task_id": task_id}
 
 
@@ -99,7 +101,7 @@ def naive_task_result(task_id: str = Query(..., description="Naive task id")):
     elapsed_ms = (time.process_time() - start_cpu) * 1000
     total_ms = _CPU_MS_NAIVE.get(task_id, 0.0) + elapsed_ms
     _CPU_MS_NAIVE[task_id] = total_ms
-    return {
+    response = {
         "task_id": task.task_id,
         "partial_result": task.result,
         "done": task.done,
@@ -108,6 +110,9 @@ def naive_task_result(task_id: str = Query(..., description="Naive task id")):
             "server_sent_ts": time.time(),
         },
     }
+    if task.done and task.demo:
+        store.delete_task(task.task_id)
+    return response
 
 
 @router.post("/document-analysis")
@@ -118,7 +123,13 @@ def naive_document_analysis(body: NaiveDocRequest):
     if not document_path:
         raise HTTPException(status_code=400, detail="document_path or document_url is required")
     if store.get_doc_task(task_id) is None:
-        store.create_doc_task(task_id, document_path, body.keywords, body.document_url)
+        store.create_doc_task(
+            task_id,
+            document_path,
+            body.keywords,
+            body.document_url,
+            demo=body.demo,
+        )
     return {"task_id": task_id}
 
 
@@ -172,7 +183,7 @@ def naive_document_snippets(task_id: str = Query(...), after: int | None = None)
     elapsed_ms = (time.process_time() - start_cpu) * 1000
     total_ms = _CPU_MS_NAIVE.get(task_id, 0.0) + elapsed_ms
     _CPU_MS_NAIVE[task_id] = total_ms
-    return {
+    response = {
         "snippets": snippets,
         "last_id": snippets[-1]["id"] if snippets else last_id,
         "metadata": {
@@ -180,3 +191,8 @@ def naive_document_snippets(task_id: str = Query(...), after: int | None = None)
             "server_sent_ts": time.time(),
         },
     }
+    if task.done:
+        max_id = store.get_max_snippet_id(task_id)
+        if response["last_id"] >= max_id and task.demo:
+            store.delete_doc_task(task_id)
+    return response

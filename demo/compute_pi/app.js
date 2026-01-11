@@ -75,7 +75,7 @@ class ApiClient {
     const res = await fetch(`${API_BASE}/naive/calculate_pi`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ digits, task_id: taskId }),
+      body: JSON.stringify({ digits, task_id: taskId, demo: true }),
     });
     if (!res.ok) {
       throw new Error(`Failed to start naive task (${res.status})`);
@@ -255,6 +255,12 @@ class PollingEngine {
           this.state.metrics.serverCpuMs = meta.server_cpu_ms_naive;
         }
         this._maybeFirstUpdate(progressRes.data);
+        if (["COMPLETED", "FAILED", "CANCELLED"].includes(this.state.status)) {
+          this.state.completed = true;
+          this.state.metrics.totalMs = performance.now() - this.startTime;
+          this.stop();
+          return;
+        }
       } else if (progressRes.error) {
         log("error", "Polling progress failed", { clientId: this.state.id });
       }

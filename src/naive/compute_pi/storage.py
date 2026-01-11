@@ -14,6 +14,7 @@ def _utc_now() -> str:
 class NaiveTaskRow:
     task_id: str
     digits: int
+    demo: bool
     status: str
     progress_current: int
     progress_total: int
@@ -42,6 +43,7 @@ class ComputePiStore:
                 CREATE TABLE IF NOT EXISTS naive_tasks (
                     task_id TEXT PRIMARY KEY,
                     digits INTEGER NOT NULL,
+                    demo INTEGER NOT NULL DEFAULT 0,
                     status TEXT NOT NULL,
                     progress_current INTEGER NOT NULL,
                     progress_total INTEGER NOT NULL,
@@ -56,18 +58,20 @@ class ComputePiStore:
             columns = {row[1] for row in conn.execute("PRAGMA table_info(naive_tasks)")}
             if "metrics" not in columns:
                 conn.execute("ALTER TABLE naive_tasks ADD COLUMN metrics TEXT")
+            if "demo" not in columns:
+                conn.execute("ALTER TABLE naive_tasks ADD COLUMN demo INTEGER NOT NULL DEFAULT 0")
 
-    def create_task(self, task_id: str, digits: int) -> None:
+    def create_task(self, task_id: str, digits: int, demo: bool = False) -> None:
         now = _utc_now()
         with self._connect() as conn:
             conn.execute(
                 """
                 INSERT INTO naive_tasks (
-                    task_id, digits, status, progress_current, progress_total,
+                    task_id, digits, demo, status, progress_current, progress_total,
                     result, done, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
-                (task_id, digits, "QUEUED", 0, digits, "", 0, now, now),
+                (task_id, digits, 1 if demo else 0, "QUEUED", 0, digits, "", 0, now, now),
             )
 
     def get_task(self, task_id: str) -> NaiveTaskRow | None:
@@ -81,6 +85,7 @@ class ComputePiStore:
         return NaiveTaskRow(
             task_id=row["task_id"],
             digits=row["digits"],
+            demo=bool(row["demo"]),
             status=row["status"],
             progress_current=row["progress_current"],
             progress_total=row["progress_total"],
@@ -144,3 +149,7 @@ class ComputePiStore:
                     task_id,
                 ),
             )
+
+    def delete_task(self, task_id: str) -> None:
+        with self._connect() as conn:
+            conn.execute("DELETE FROM naive_tasks WHERE task_id = ?", (task_id,))

@@ -16,6 +16,7 @@ class NaiveDocTaskRow:
     document_path: str
     document_url: str | None
     keywords: list[str]
+    demo: bool
     status: str
     progress_current: int
     progress_total: int
@@ -46,6 +47,7 @@ class DocumentAnalysisStore:
                     document_path TEXT NOT NULL,
                     document_url TEXT,
                     keywords TEXT NOT NULL,
+                    demo INTEGER NOT NULL DEFAULT 0,
                     status TEXT NOT NULL,
                     progress_current INTEGER NOT NULL,
                     progress_total INTEGER NOT NULL,
@@ -68,6 +70,8 @@ class DocumentAnalysisStore:
                 conn.execute("ALTER TABLE naive_doc_tasks ADD COLUMN keywords TEXT NOT NULL")
             if "document_url" not in doc_columns:
                 conn.execute("ALTER TABLE naive_doc_tasks ADD COLUMN document_url TEXT")
+            if "demo" not in doc_columns:
+                conn.execute("ALTER TABLE naive_doc_tasks ADD COLUMN demo INTEGER NOT NULL DEFAULT 0")
 
             conn.execute(
                 """
@@ -89,21 +93,23 @@ class DocumentAnalysisStore:
         document_path: str,
         keywords: list[str],
         document_url: str | None = None,
+        demo: bool = False,
     ) -> None:
         now = _utc_now()
         with self._connect() as conn:
             conn.execute(
                 """
                 INSERT INTO naive_doc_tasks (
-                    task_id, document_path, document_url, keywords, status, progress_current, progress_total,
+                    task_id, document_path, document_url, keywords, demo, status, progress_current, progress_total,
                     done, metrics, last_snippet_id, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     task_id,
                     document_path,
                     document_url,
                     json.dumps(keywords),
+                    1 if demo else 0,
                     "QUEUED",
                     0,
                     0,
@@ -150,6 +156,7 @@ class DocumentAnalysisStore:
             document_path=row["document_path"],
             document_url=row["document_url"],
             keywords=json.loads(row["keywords"]) if row["keywords"] else [],
+            demo=bool(row["demo"]),
             status=row["status"],
             progress_current=row["progress_current"],
             progress_total=row["progress_total"],
@@ -241,3 +248,16 @@ class DocumentAnalysisStore:
                 """,
                 (last_id, _utc_now(), task_id),
             )
+
+    def get_max_snippet_id(self, task_id: str) -> int:
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT MAX(id) AS max_id FROM naive_doc_snippets WHERE task_id = ?",
+                (task_id,),
+            ).fetchone()
+        return int(row["max_id"] or 0)
+
+    def delete_doc_task(self, task_id: str) -> None:
+        with self._connect() as conn:
+            conn.execute("DELETE FROM naive_doc_snippets WHERE task_id = ?", (task_id,))
+            conn.execute("DELETE FROM naive_doc_tasks WHERE task_id = ?", (task_id,))
