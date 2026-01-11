@@ -23,15 +23,6 @@ DEFAULT_DOWNLOAD_DIR = "/data/books"
 logger = logging.getLogger(__name__)
 
 
-def _eta_seconds(start_time: float, processed_bytes: int, total_bytes: int) -> float:
-    elapsed = time.monotonic() - start_time
-    if processed_bytes <= 0 or elapsed <= 0 or total_bytes <= 0:
-        return 0.0
-    rate = processed_bytes / elapsed
-    remaining = max(total_bytes - processed_bytes, 0)
-    return remaining / rate if rate > 0 else 0.0
-
-
 def _emit_snippet(
     chunks: TaskReporter,
     *,
@@ -87,7 +78,7 @@ def _report_failed(reporter: TaskReporter, message: str) -> dict:
         state=TaskState.FAILED,
         progress=TaskProgress(current=0, total=0, percentage=0.0),
         message=message,
-        metrics={"eta_seconds": 0.0, "snippets_emitted": 0, "words_processed": 0},
+        metrics={"snippets_emitted": 0},
     )
     reporter.report_status(status)
     return {"error": message}
@@ -99,11 +90,8 @@ def _report_running_status(
     bytes_read: int,
     total_bytes: int,
     snippets_emitted: int,
-    words_processed: int,
-    start_time: float,
 ) -> None:
     progress = bytes_read / total_bytes if total_bytes else 1.0
-    eta = _eta_seconds(start_time, bytes_read, total_bytes)
     reporter.report_status(
         TaskStatus(
             state=TaskState.RUNNING,
@@ -113,9 +101,7 @@ def _report_running_status(
                 percentage=progress,
             ),
             metrics={
-                "eta_seconds": eta,
                 "snippets_emitted": snippets_emitted,
-                "words_processed": words_processed,
             },
         )
     )
@@ -147,9 +133,7 @@ def document_analysis(self, payload: dict) -> dict:
 
     total_bytes = os.path.getsize(document_path)
     pattern = re.compile("|".join(re.escape(keyword) for keyword in keywords), re.IGNORECASE)
-    start_time = time.monotonic()
     total_snippets_emitted = 0
-    words_processed = 0
     chunk_index = 0
     line_number = 1
 
@@ -159,9 +143,7 @@ def document_analysis(self, payload: dict) -> dict:
             progress=TaskProgress(current=0, total=total_bytes, percentage=0.0),
             message="started",
             metrics={
-                "eta_seconds": 0.0,
                 "snippets_emitted": 0,
-                "words_processed": 0,
             },
         )
     )
@@ -170,6 +152,7 @@ def document_analysis(self, payload: dict) -> dict:
         with open(document_path, "rb") as handle:
             while True:
                 lines_to_read = random.randint(MIN_LINES_PER_CHUNK, MAX_LINES_PER_CHUNK)
+                chunk_start = handle.tell()
                 lines = list(itertools.islice(handle, lines_to_read))
                 if not lines:
                     break
@@ -179,8 +162,6 @@ def document_analysis(self, payload: dict) -> dict:
                 line_offsets = list(
                     itertools.accumulate((len(line) for line in text_lines), initial=0)
                 )
-                words_processed += len(chunk_text.split())
-
                 snippets_emitted = 0
                 for match in pattern.finditer(chunk_text):
                     if snippets_emitted >= MAX_SNIPPETS_PER_CHUNK:
@@ -197,13 +178,12 @@ def document_analysis(self, payload: dict) -> dict:
                     snippets_emitted += 1
                     total_snippets_emitted += 1
                     time.sleep(random.uniform(0.1, 0.5))  # Simulate processing delay
+                    bytes_read = min(chunk_start + match.start(), total_bytes)
                     _report_running_status(
                         reporter,
-                        bytes_read=handle.tell(),
+                        bytes_read=bytes_read,
                         total_bytes=total_bytes,
                         snippets_emitted=total_snippets_emitted,
-                        words_processed=words_processed,
-                        start_time=start_time,
                     )
 
                 if snippets_emitted == 0:
@@ -212,8 +192,6 @@ def document_analysis(self, payload: dict) -> dict:
                         bytes_read=handle.tell(),
                         total_bytes=total_bytes,
                         snippets_emitted=total_snippets_emitted,
-                        words_processed=words_processed,
-                        start_time=start_time,
                     )
 
                 chunk_index += 1
@@ -225,9 +203,7 @@ def document_analysis(self, payload: dict) -> dict:
             progress=TaskProgress(current=total_bytes, total=total_bytes, percentage=1.0),
             message="completed",
             metrics={
-                "eta_seconds": 0.0,
                 "snippets_emitted": total_snippets_emitted,
-                "words_processed": words_processed,
             },
         )
     )

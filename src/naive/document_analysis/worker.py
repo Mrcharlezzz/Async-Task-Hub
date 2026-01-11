@@ -16,15 +16,6 @@ MAX_SNIPPETS_PER_CHUNK = 2000
 DEFAULT_DOWNLOAD_DIR = "/data/books"
 
 
-def _eta_seconds(start_time: float, processed_bytes: int, total_bytes: int) -> float:
-    elapsed = time.monotonic() - start_time
-    if processed_bytes <= 0 or elapsed <= 0 or total_bytes <= 0:
-        return 0.0
-    rate = processed_bytes / elapsed
-    remaining = max(total_bytes - processed_bytes, 0)
-    return remaining / rate if rate > 0 else 0.0
-
-
 def _resolve_document_path(document_path: str | None, document_url: str | None) -> str | None:
     if document_url:
         parsed = urlparse(document_url)
@@ -51,7 +42,7 @@ def _mark_failed(store: DocumentAnalysisStore, task_id: str) -> None:
         progress_total=0,
         done=True,
         status="FAILED",
-        metrics={"eta_seconds": 0.0, "snippets_emitted": 0, "words_processed": 0},
+        metrics={"snippets_emitted": 0},
     )
 
 
@@ -84,9 +75,7 @@ def main() -> None:
 
         with open(document_path, "rb") as handle:
             total_bytes = os.path.getsize(document_path)
-            start_time = time.monotonic()
             snippet_count = 0
-            words_processed = 0
             chunk_index = 0
             line_number = 1
 
@@ -97,9 +86,7 @@ def main() -> None:
                 done=False,
                 status="RUNNING",
                 metrics={
-                    "eta_seconds": 0.0,
                     "snippets_emitted": 0,
-                    "words_processed": 0,
                 },
             )
 
@@ -109,6 +96,7 @@ def main() -> None:
 
             while True:
                 lines_to_read = random.randint(MIN_LINES_PER_CHUNK, MAX_LINES_PER_CHUNK)
+                chunk_start = handle.tell()
                 lines = list(itertools.islice(handle, lines_to_read))
                 if not lines:
                     break
@@ -118,8 +106,6 @@ def main() -> None:
                 line_offsets = list(
                     itertools.accumulate((len(line) for line in text_lines), initial=0)
                 )
-                words_processed += len(chunk_text.split())
-
                 snippets_emitted = 0
                 for match in pattern.finditer(chunk_text):
                     if snippets_emitted >= MAX_SNIPPETS_PER_CHUNK:
@@ -139,9 +125,8 @@ def main() -> None:
                     )
                     snippets_emitted += 1
                     snippet_count += 1
-                    time.sleep(random.uniform(0.1, 0.5))  # Simulate processing delay 
-                    bytes_read = handle.tell()
-                    eta = _eta_seconds(start_time, bytes_read, total_bytes)
+                    time.sleep(random.uniform(0.1, 0.5))  # Simulate processing delay
+                    bytes_read = min(chunk_start + match.start(), total_bytes)
                     store.update_doc_progress(
                         task.task_id,
                         progress_current=bytes_read,
@@ -149,27 +134,22 @@ def main() -> None:
                         done=False,
                         status="RUNNING",
                         metrics={
-                            "eta_seconds": eta,
                             "snippets_emitted": snippet_count,
-                            "words_processed": words_processed,
                         },
                     )
 
                 if snippets_emitted == 0:
                     bytes_read = handle.tell()
-                    eta = _eta_seconds(start_time, bytes_read, total_bytes)
                     store.update_doc_progress(
                         task.task_id,
                         progress_current=bytes_read,
                         progress_total=total_bytes,
                         done=False,
-                        status="RUNNING",
-                        metrics={
-                            "eta_seconds": eta,
-                            "snippets_emitted": snippet_count,
-                            "words_processed": words_processed,
-                        },
-                    )
+                    status="RUNNING",
+                    metrics={
+                        "snippets_emitted": snippet_count,
+                    },
+                )
 
                 chunk_index += 1
                 line_number += len(lines)
@@ -181,9 +161,7 @@ def main() -> None:
                 done=True,
                 status="COMPLETED",
                 metrics={
-                    "eta_seconds": 0.0,
                     "snippets_emitted": snippet_count,
-                    "words_processed": words_processed,
                 },
             )
 
