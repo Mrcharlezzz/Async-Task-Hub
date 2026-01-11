@@ -21,6 +21,7 @@ _stream_publisher: StreamsSyncPublisher | None = None
 
 
 class StreamSettings(BaseSettings):
+    """Configuration for Redis Streams consumer/publisher wiring."""
     REDIS_URL: str = "redis://redis:6379/0"
     STREAM_NAME: str = STREAM_TASK_EVENTS
     GROUP_NAME: str = GROUP_API
@@ -34,6 +35,7 @@ class StreamSettings(BaseSettings):
 
 
 def build_event_router() -> EventRouter:
+    """Build an event router wired to the task event handler."""
     router = EventRouter()
     handler = TaskEventHandler()
     router.register(EventType.TASK_STATUS, handler.handle_status_event)
@@ -43,10 +45,12 @@ def build_event_router() -> EventRouter:
 
 
 def build_stream_consumer(settings: StreamSettings | None = None) -> StreamsConsumer:
+    """Create a streams consumer bound to the task event router."""
     if settings is None:
         settings = StreamSettings()
     client = StreamsClient(settings.REDIS_URL)
     router = build_event_router()
+    # Consumer name is generated when not provided so multiple API instances can join the group.
     name = settings.CONSUMER_NAME or consumer_name()
     return StreamsConsumer(
         client,
@@ -62,6 +66,7 @@ def build_stream_consumer(settings: StreamSettings | None = None) -> StreamsCons
 
 
 def build_stream_publisher(settings: StreamSettings | None = None) -> StreamsSyncPublisher:
+    """Create a sync streams publisher for worker-side event emission."""
     if settings is None:
         settings = StreamSettings()
     client = SyncStreamsClient(settings.REDIS_URL)
@@ -69,12 +74,14 @@ def build_stream_publisher(settings: StreamSettings | None = None) -> StreamsSyn
 
 
 def configure_stream_publisher(settings: StreamSettings | None = None) -> StreamsSyncPublisher:
+    """Create a singleton publisher and bind it into the DI container."""
     global _stream_publisher
     if _stream_publisher is None:
         _stream_publisher = build_stream_publisher(settings)
 
     if inject.is_configured():
         injector = inject.get_injector()
+        # Older inject versions expose binder; newer ones expose bind() directly.
         if hasattr(injector, "binder"):
             injector.binder.bind(TaskEventPublisherRepository, _stream_publisher)
         else:
@@ -89,6 +96,7 @@ def configure_stream_publisher(settings: StreamSettings | None = None) -> Stream
 
 
 def configure_stream_consumer() -> StreamsConsumer:
+    """Return the singleton streams consumer used by the API process."""
     global _stream_consumer
     if _stream_consumer is None:
         _stream_consumer = build_stream_consumer()
