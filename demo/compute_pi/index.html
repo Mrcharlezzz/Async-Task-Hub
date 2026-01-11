@@ -10,13 +10,14 @@
     <main class="app">
       <header class="hero">
         <div>
-          <p class="eyebrow">Redis Streams + WebSockets Demo</p>
-          <h1>Streaming Beats Polling</h1>
+          <p class="eyebrow">Update Delivery Demo — Compute Pi</p>
+          <h1>Event-Driven Streaming vs HTTP DB Polling</h1>
           <p class="subtitle">
-            Same task. Same time. Two clients. Watch how the architecture changes the experience.
+            Updates are emitted at irregular intervals to simulate real workloads.
           </p>
         </div>
         <form id="controls" class="controls">
+          <p class="controls-title">Parameters</p>
           <label class="field">
             <span>Digits</span>
             <input id="digits" type="number" min="50" max="1000" value="40" />
@@ -34,7 +35,7 @@
         <article class="panel panel-streaming">
           <header>
             <h2>Streaming</h2>
-            <p>WebSocket + Redis Streams</p>
+            <p>Celery + Redis Streams + WebSockets</p>
           </header>
           <div class="clients" data-panel="streaming"></div>
           <dl class="metrics" data-panel="streaming"></dl>
@@ -43,7 +44,7 @@
         <article class="panel panel-polling">
           <header>
             <h2>Naive Polling</h2>
-            <p>Worst-practice baseline</p>
+            <p>HTTP polling + SQLite</p>
           </header>
           <div class="clients" data-panel="polling"></div>
           <dl class="metrics" data-panel="polling"></dl>

@@ -445,6 +445,7 @@ let streamingEngine = null;
 let pollingEngine = null;
 const streamingState = createPanelState();
 const pollingState = createPanelState();
+let runInProgress = false;
 
 function updateUI() {
   UI.streaming.progress.style.width = `${Math.min(streamingState.progress * 100, 100)}%`;
@@ -466,6 +467,12 @@ function updateUI() {
     ...pollingState.metrics,
     mode: "polling",
   });
+
+  if (runInProgress && streamingState.completed && pollingState.completed) {
+    runInProgress = false;
+    UI.runButton.disabled = false;
+    UI.runStatus.textContent = "Completed";
+  }
 }
 
 function appendResultText(container, text) {
@@ -506,6 +513,7 @@ async function runDemo(event) {
   event.preventDefault();
   if (!UI.runButton) return;
   UI.runButton.disabled = true;
+  runInProgress = true;
   UI.runStatus.textContent = "Starting…";
   UI.logOutput.textContent = "";
 
@@ -526,12 +534,14 @@ async function runDemo(event) {
     log("error", "Document path or URL is required");
     UI.runStatus.textContent = "Missing document path/URL";
     UI.runButton.disabled = false;
+    runInProgress = false;
     return;
   }
   if (!keywords.length) {
     log("error", "Keywords are required");
     UI.runStatus.textContent = "Missing keywords";
     UI.runButton.disabled = false;
+    runInProgress = false;
     return;
   }
 
@@ -555,8 +565,8 @@ async function runDemo(event) {
   } catch (error) {
     log("error", "Run failed", { error: String(error) });
     UI.runStatus.textContent = "Failed to start";
-  } finally {
     UI.runButton.disabled = false;
+    runInProgress = false;
   }
 }
 

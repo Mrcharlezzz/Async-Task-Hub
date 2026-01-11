@@ -10,13 +10,14 @@
     <main class="app">
       <header class="hero">
         <div>
-          <p class="eyebrow">Document Analyzer Demo</p>
-          <h1>Streaming vs Naive Polling</h1>
+          <p class="eyebrow">Update Delivery Demo — Document Analysis</p>
+          <h1>Event-Driven Streaming vs HTTP Polling</h1>
           <p class="subtitle">
-            Bursty snippet events show why streaming wins when updates are irregular.
+            Updates are emitted at irregular intervals to simulate real workloads.
           </p>
         </div>
         <form id="controls" class="controls">
+          <p class="controls-title">Parameters</p>
           <label class="field">
             <span>Document Path</span>
             <input id="doc-path" type="text" value="/data/books/metamorphosis.txt" />
@@ -50,7 +51,7 @@
         <article class="panel panel-streaming">
           <header>
             <h2>Streaming</h2>
-            <p>WebSocket + Redis Streams</p>
+            <p>Celery + Redis Streams + WebSockets</p>
           </header>
           <div class="client">
             <div class="client-metrics" id="streaming-metrics">metrics: —</div>
@@ -65,7 +66,7 @@
         <article class="panel panel-polling">
           <header>
             <h2>Naive Polling</h2>
-            <p>Worst-practice baseline</p>
+            <p>HTTP polling + SQLite</p>
           </header>
           <div class="client">
             <div class="client-metrics" id="polling-metrics">metrics: —</div>
