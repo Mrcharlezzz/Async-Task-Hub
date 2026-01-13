@@ -111,6 +111,10 @@ Compare streaming and polling under **bursty, irregular update patterns** produc
 For detailed instructions on running the demos and interpreting the observed metrics,
 see the [Demo Guide](demo_guide.md).
 
+### Results
+The system demonstrates lower server CPU usage and more stable end-to-end latency when delivering frequent and irregular updates in real time, while remaining responsive with multiple concurrent clients. 
+
+When compared against a baseline implementation using HTTP polling for updates, the system achieves similar perceived latency with approximately 5× lower server CPU usage, and delivers update messages to multiple concurrent clients up to 8× faster.
 
 ## Baseline Worker (Polling Model)
 
