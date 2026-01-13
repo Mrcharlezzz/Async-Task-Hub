@@ -11,7 +11,7 @@ from src.setup.db_config import DatabaseSettings
 
 def _config(binder: inject.Binder) -> None:
     """Bind domain interfaces to concrete implementations."""
-    db_settings = DatabaseSettings()
+    db_settings = DatabaseSettings()  # type: ignore[call-arg]
     orm = PostgresOrm(db_settings.DATABASE_URL)
     binder.bind(TaskManagerRepository, CeleryTaskManager())
     binder.bind(StorageRepository, PostgresStorageRepository(orm))

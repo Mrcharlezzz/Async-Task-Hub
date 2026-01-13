@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import Any
+from typing import Any, cast
 
 import inject
 
@@ -19,7 +19,10 @@ class TaskReporter:
         publisher: TaskEventPublisherRepository | None = None,
     ) -> None:
         self._task_id = task_id
-        self._publisher = publisher or inject.instance(TaskEventPublisherRepository)
+        self._publisher = publisher or cast(
+            TaskEventPublisherRepository,
+            inject.instance(TaskEventPublisherRepository),
+        )
 
     def report_status(self, status: TaskStatus) -> None:
         event = TaskEvent.status(self._task_id, status)

@@ -12,7 +12,7 @@ from src.app.domain.models.task_progress import TaskProgress
 from src.app.domain.models.task_state import TaskState
 from src.app.domain.models.task_status import TaskStatus
 from src.app.infrastructure.celery.app import celery_app
-from src.app.worker.reporter import TaskReporter
+from src.app.worker.reporter import ResultChunkReporter, TaskReporter
 
 MIN_LINES_PER_CHUNK = 50
 MAX_LINES_PER_CHUNK = 300
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 def _emit_snippet(
-    chunks: TaskReporter,
+    chunks: ResultChunkReporter,
     *,
     match: re.Match[str],
     chunk_text: str,

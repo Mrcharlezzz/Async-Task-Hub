@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
+from typing import cast
+
+from redis.typing import EncodableT
 
 from src.app.domain.events.task_event import TaskEvent
 from src.app.infrastructure.streams.client import StreamsClient, SyncStreamsClient
@@ -28,9 +31,10 @@ class StreamsPublisher:
             batch = events
 
         for event in batch:
+            fields = cast(dict[EncodableT, EncodableT], encode_event(event))
             await self._client.redis.xadd(
                 self._stream,
-                encode_event(event),
+                fields,
                 maxlen=maxlen,
                 approximate=approximate,
             )
@@ -57,9 +61,10 @@ class StreamsSyncPublisher:
             batch = events
 
         for event in batch:
+            fields = cast(dict[EncodableT, EncodableT], encode_event(event))
             self._client.redis.xadd(
                 self._stream,
-                encode_event(event),
+                fields,
                 maxlen=maxlen,
                 approximate=approximate,
             )

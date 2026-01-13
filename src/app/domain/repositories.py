@@ -34,8 +34,8 @@ class StorageRepository(Protocol):
     ) -> str:
         """Persist a new task owned by ``user_id`` and return its id."""
 
-    async def get_task(self, user_id: str, task_id: str) -> Task | None:
-        """Return the task if owned by ``user_id``; otherwise ``None``."""
+    async def get_task(self, user_id: str, task_id: str) -> Task:
+        """Return the task if owned by ``user_id``; otherwise raise."""
 
     async def get_status(self, user_id: str, task_id: str) -> TaskStatus:
         """Return the status for a task owned by ``user_id``."""

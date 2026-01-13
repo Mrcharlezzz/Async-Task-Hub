@@ -182,9 +182,10 @@ def naive_document_snippets(task_id: str = Query(...), after: int | None = None)
     elapsed_ms = (time.process_time() - start_cpu) * 1000
     total_ms = _CPU_MS_NAIVE.get(task_id, 0.0) + elapsed_ms
     _CPU_MS_NAIVE[task_id] = total_ms
+    last_seen_id: int = snippets[-1]["id"] if snippets else last_id
     response = {
         "snippets": snippets,
-        "last_id": snippets[-1]["id"] if snippets else last_id,
+        "last_id": last_seen_id,
         "metadata": {
             "server_cpu_ms_naive": total_ms,
             "server_sent_ts": time.time(),
@@ -192,6 +193,6 @@ def naive_document_snippets(task_id: str = Query(...), after: int | None = None)
     }
     if task.done:
         max_id = store.get_max_snippet_id(task_id)
-        if response["last_id"] >= max_id and task.demo:
+        if last_seen_id >= max_id and task.demo:
             store.delete_doc_task(task_id)
     return response

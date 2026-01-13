@@ -1,6 +1,5 @@
 import inject
-from pydantic import ConfigDict
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from src.app.application.handlers import TaskEventHandler
 from src.app.domain.events.task_event import EventType
@@ -30,7 +29,7 @@ class StreamSettings(BaseSettings):
     RECLAIM_PENDING: bool = False
     RECLAIM_IDLE_MS: int = 60000
 
-    model_config = ConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
 def build_event_router() -> EventRouter:
@@ -82,9 +81,15 @@ def configure_stream_publisher(settings: StreamSettings | None = None) -> Stream
         injector = inject.get_injector()
         # Older inject versions expose binder; newer ones expose bind() directly.
         if hasattr(injector, "binder"):
-            injector.binder.bind(TaskEventPublisherRepository, _stream_publisher)
+            injector.binder.bind(  # type: ignore[union-attr]
+                TaskEventPublisherRepository,
+                _stream_publisher,
+            )
         else:
-            injector.bind(TaskEventPublisherRepository, _stream_publisher)
+            injector.bind(  # type: ignore[union-attr]
+                TaskEventPublisherRepository,
+                _stream_publisher,
+            )
     else:
         def _config(binder: inject.Binder) -> None:
             binder.bind(TaskEventPublisherRepository, _stream_publisher)

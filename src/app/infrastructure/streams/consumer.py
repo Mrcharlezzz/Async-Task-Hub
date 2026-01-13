@@ -4,7 +4,7 @@ import asyncio
 import logging
 import os
 import socket
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 
 from redis.exceptions import ConnectionError, RedisError, TimeoutError
 
@@ -98,7 +98,10 @@ class StreamsConsumer:
                 break
 
     async def _handle_response(
-        self, response: Iterable[tuple[bytes, list[tuple[bytes, dict[bytes, bytes]]]]]
+        self,
+        response: Iterable[
+            tuple[bytes, list[tuple[bytes, Mapping[bytes, bytes]]]]
+        ],
     ) -> None:
         """Decode and dispatch events, then acknowledge messages."""
         for _stream, entries in response:

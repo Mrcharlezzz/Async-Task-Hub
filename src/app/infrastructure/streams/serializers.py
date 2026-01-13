@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
-from typing import Any
+from typing import Any, Mapping
 
 from pydantic import ValidationError
 
@@ -14,7 +14,7 @@ def _as_str(value: Any) -> str:
     return str(value)
 
 
-def encode_event(event: TaskEvent) -> dict[str, str | bytes]:
+def encode_event(event: TaskEvent) -> dict[str, str | int | float | bytes]:
     """Serialize a TaskEvent for Redis streams."""
     return {
         "event_id": event.event_id,
@@ -25,9 +25,9 @@ def encode_event(event: TaskEvent) -> dict[str, str | bytes]:
     }
 
 
-def decode_event(fields: dict[str, Any]) -> TaskEvent:
+def decode_event(fields: Mapping[bytes, Any] | Mapping[str, Any]) -> TaskEvent:
     """Deserialize a TaskEvent from Redis stream fields."""
-    raw_payload = fields.get("payload")
+    raw_payload = fields.get("payload")  # type: ignore[arg-type]
     payload_str = _as_str(raw_payload)
     try:
         payload = json.loads(payload_str)
@@ -35,10 +35,10 @@ def decode_event(fields: dict[str, Any]) -> TaskEvent:
         raise ValueError("Invalid payload JSON") from exc
 
     event_data = {
-        "event_id": _as_str(fields.get("event_id", "")),
-        "type": EventType(_as_str(fields.get("type", ""))),
-        "task_id": _as_str(fields.get("task_id", "")),
-        "ts": datetime.fromisoformat(_as_str(fields.get("ts", ""))),
+        "event_id": _as_str(fields.get("event_id", "")),  # type: ignore[arg-type]
+        "type": EventType(_as_str(fields.get("type", ""))),  # type: ignore[arg-type]
+        "task_id": _as_str(fields.get("task_id", "")),  # type: ignore[arg-type]
+        "ts": datetime.fromisoformat(_as_str(fields.get("ts", ""))),  # type: ignore[arg-type]
         "payload": payload,
     }
     try:

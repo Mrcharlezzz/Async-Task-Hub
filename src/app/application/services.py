@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 
 import inject
+from typing import cast
 
 from src.app.domain.models import (
     Task,
@@ -18,16 +19,18 @@ from src.app.domain.repositories import StorageRepository, TaskManagerRepository
 class TaskService:
     """Handles submission of asynchronous tasks to the Celery broker."""
 
-    def __init__(self):
-        self._task_manager: TaskManagerRepository = inject.instance(TaskManagerRepository)
-        self._storage: StorageRepository = inject.instance(StorageRepository)
+    def __init__(self) -> None:
+        self._task_manager = cast(
+            TaskManagerRepository, inject.instance(TaskManagerRepository)
+        )
+        self._storage = cast(StorageRepository, inject.instance(StorageRepository))
 
     async def push_task(
         self, task_type: TaskType, payload: TaskPayload, user_id: str = "anonymous"
     ) -> str:
         """Enqueue a task with the provided payload and return its task id."""
         task = await self.create_task(task_type, payload, user_id=user_id)
-        return task.id
+        return task.id  # type: ignore[return-value]
 
     async def create_task(
         self, task_type: TaskType, payload: TaskPayload, user_id: str = "anonymous"

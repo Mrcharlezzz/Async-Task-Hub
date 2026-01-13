@@ -3,6 +3,7 @@ import time
 from functools import wraps
 
 import inject
+from typing import cast
 
 from src.app.application.broadcaster import TaskStatusBroadcaster
 from src.app.domain.events.task_event import TaskEvent
@@ -44,8 +45,10 @@ class TaskEventHandler:
         broadcaster: TaskStatusBroadcaster | None = None,
         status_delta: float = 0.02,
     ) -> None:
-        self._storage = storage or inject.instance(StorageRepository)
-        self._broadcaster = broadcaster or inject.instance(TaskStatusBroadcaster)
+        self._storage = storage or cast(StorageRepository, inject.instance(StorageRepository))
+        self._broadcaster = broadcaster or cast(
+            TaskStatusBroadcaster, inject.instance(TaskStatusBroadcaster)
+        )
         self._status_delta = status_delta
         self._status_cache: dict[str, float] = {}
         self._cpu_ws_total_ms: dict[str, float] = {}

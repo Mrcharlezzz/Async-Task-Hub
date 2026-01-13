@@ -46,7 +46,7 @@ class PostgresStorageRepository(StorageRepository):
                 session.add(task_row)
         return task.id
 
-    async def get_task(self, user_id: str, task_id: str) -> Task | None:
+    async def get_task(self, user_id: str, task_id: str) -> Task:
         """Fetch a task by id and enforce ownership."""
         async with self._orm.session_factory() as session:
             result = await session.execute(
