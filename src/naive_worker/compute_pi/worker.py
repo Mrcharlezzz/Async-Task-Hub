@@ -45,7 +45,7 @@ def main() -> None:
             # Store progress and partial result for the polling client.
             store.update_progress(
                 task.task_id,
-                progress_current=idx,
+                progress_current=idx+1,
                 progress_total=total,
                 result=result,
                 done=False,

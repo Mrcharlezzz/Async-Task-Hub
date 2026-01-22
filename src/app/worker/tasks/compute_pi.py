@@ -32,6 +32,8 @@ def compute_pi(self, payload: dict) -> dict:
     with reporter.report_result_chunk(batch_size=1) as chunks:
         for k, digit in enumerate(pi):
             sleep_time = random.uniform(0.1, 0.5)
+            # Delay simulating heavy computation.
+            time.sleep(sleep_time)
             done = k + 1
             progress = done / total if total else 1.0
             remaining = total - done
@@ -50,8 +52,6 @@ def compute_pi(self, payload: dict) -> dict:
             )
             reporter.report_status(status)
             chunks.emit(digit)
-            # Delay after emitting so the stream stays responsive on connect.
-            time.sleep(sleep_time)
 
     # Final result is stored once, after streaming completes.
     reporter.report_result({"task_id": self.request.id, "data": pi})

@@ -261,6 +261,11 @@ class PollingEngine {
           this.stop();
           return;
         }
+      } else if (progressRes.status === 404) {
+        this.state.completed = true;
+        this.state.metrics.totalMs = performance.now() - this.startTime;
+        this.stop();
+        return;
       } else if (progressRes.error) {
         log("error", "Polling progress failed", { clientId: this.state.id });
       }
@@ -284,6 +289,10 @@ class PollingEngine {
           this.state.metrics.totalMs = performance.now() - this.startTime;
           this.stop();
         }
+      } else if (resultRes.status === 404) {
+        this.state.completed = true;
+        this.state.metrics.totalMs = performance.now() - this.startTime;
+        this.stop();
       } else if (resultRes.error) {
         log("error", "Polling result failed", { clientId: this.state.id });
       }

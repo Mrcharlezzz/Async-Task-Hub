@@ -296,6 +296,12 @@ class PollingEngine {
       if (statusRes.elapsedMs !== undefined) {
         this.state.metrics.latencyTotalMs += statusRes.elapsedMs;
         this.state.metrics.latencyCount += 1;
+      } else if (statusRes.status === 404) {
+        this.state.completed = true;
+        this.state.metrics.totalMs = performance.now() - this.startTime;
+        this.stop();
+        this.onUpdate();
+        return;
       }
       if (statusRes.ok && statusRes.data) {
         const progress = statusRes.data.progress?.percentage ?? 0;
@@ -307,6 +313,12 @@ class PollingEngine {
           this.state.metrics.serverCpuMs = meta.server_cpu_ms_naive;
         }
         this._maybeFirstUpdate(progress, statusRes.data.metrics);
+      } else if (snippetRes.status === 404) {
+        this.state.completed = true;
+        this.state.metrics.totalMs = performance.now() - this.startTime;
+        this.stop();
+        this.onUpdate();
+        return;
       }
 
       const snippetRes = await this.apiClient.getNaiveSnippets(
