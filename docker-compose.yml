@@ -66,7 +66,7 @@ services:
   naive_demo_worker:
     build:
       context: .
-      target: api
+      target: runtime
     container_name: posttager_naive_demo_worker
     command: >
       python -m src.naive_worker.compute_pi.worker
@@ -78,7 +78,7 @@ services:
   naive_demo_doc_worker:
     build:
       context: .
-      target: api
+      target: runtime
     container_name: posttager_naive_demo_doc_worker
     command: >
       python -m src.naive_worker.document_analysis.worker

@@ -11,7 +11,6 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
 
 # Builder stage installs project dependencies once.
 FROM base AS builder
@@ -31,22 +30,22 @@ COPY src ./src
 RUN pip install --upgrade pip \
  && pip install --no-cache-dir ".[test]"
 
-# API runtime image.
-FROM base AS api
+# Runtime image without DB migrations (used by non-DB services).
+FROM base AS runtime
 
 COPY --from=builder /usr/local /usr/local
 COPY --from=builder /app /app
+
+# API runtime image (runs DB migrations).
+FROM runtime AS api
 
 EXPOSE 8000
 
+RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["uvicorn", "src.app.presentation.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
-# Worker runtime image
-FROM base AS worker
+# Worker runtime image (no DB migrations).
+FROM runtime AS worker
 
-COPY --from=builder /usr/local /usr/local
-COPY --from=builder /app /app
-
-ENTRYPOINT ["/entrypoint.sh"]
 CMD ["celery", "-A", "src.app.infrastructure.celery.app:celery_app", "worker", "-l", "INFO", "--concurrency", "1"]
