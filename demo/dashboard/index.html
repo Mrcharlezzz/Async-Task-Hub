@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>PostTagger Demo — Task Dashboard</title>
+    <link rel="stylesheet" href="styles.css?v=2" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Update Delivery Demo — Task Dashboard</p>
+          <h1>Task Execution Dashboard</h1>
+          <p class="subtitle">
+            Launch tasks and monitor live updates.
+          </p>
+        </div>
+        <section class="summary">
+          <div>
+            <dt>Total Tasks</dt>
+            <dd id="summary-total">0</dd>
+          </div>
+          <div>
+            <dt>Running</dt>
+            <dd id="summary-running">0</dd>
+          </div>
+          <div>
+            <dt>Completed</dt>
+            <dd id="summary-completed">0</dd>
+          </div>
+          <div>
+            <dt>Throughput</dt>
+            <dd id="summary-throughput">—</dd>
+          </div>
+        </section>
+      </header>
+
+      <section class="controls">
+        <article class="control-card">
+          <h2>Compute Pi</h2>
+          <label class="field">
+            <span>Digits</span>
+            <input id="pi-digits" type="number" min="50" max="1000" value="40" />
+          </label>
+          <button id="pi-start" type="button">Create Compute Task</button>
+        </article>
+
+        <article class="control-card">
+          <h2>Document Analysis</h2>
+          <label class="field">
+            <span>Document URL</span>
+            <input
+              id="doc-url"
+              type="text"
+              value="https://www.gutenberg.org/cache/epub/5200/pg5200.txt"
+            />
+          </label>
+          <label class="field">
+            <span>Document Path</span>
+            <input id="doc-path" type="text" value="/data/books/metamorphosis.txt" />
+          </label>
+          <label class="field">
+            <span>Keywords (comma separated)</span>
+            <input
+              id="doc-keywords"
+              type="text"
+              value="father,mother,sister,room,door,work,office,manager,train,family"
+            />
+          </label>
+          <button id="doc-start" type="button">Create Analysis Task</button>
+        </article>
+      </section>
+
+      <section class="tasks">
+        <header>
+          <h3>Tasks</h3>
+          <p>Completed tasks remain listed with their final status.</p>
+        </header>
+        <div id="task-list" class="task-list"></div>
+      </section>
+    </main>
+
+    <script type="module" src="app.js?v=1"></script>
+  </body>
+</html>
