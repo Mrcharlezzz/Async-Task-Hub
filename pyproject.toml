@@ -1,7 +1,7 @@
 [project]
-name = "posttager-pi"
+name = "asynctaskhub-pi"
 version = "0.1.0"
-description = "JetBrains Posttagger test task: Pi calculation via Celery"
+description = "JetBrains AsyncTaskHub test task: Pi calculation via Celery"
 requires-python = ">=3.11"
 authors = [{ name = "Carlos Manuel Alfonso Basabe" }]
 readme = "README.md"

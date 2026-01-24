@@ -6,7 +6,7 @@ from src.setup.celery_config import get_celery_settings
 _settings = get_celery_settings()
 
 celery_app = Celery(
-    "posttagger",
+    "asynctaskhub",
     broker=_settings.REDIS_URL,
     backend=_settings.REDIS_URL,
 )

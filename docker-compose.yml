@@ -1,20 +1,20 @@
 services:
   redis:
     image: redis:7-alpine
-    container_name: posttager_redis
+    container_name: asynctaskhub_redis
     command: ["redis-server", "--save", "", "--appendonly", "no"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 2s
       retries: 10
-    networks: [posttager_net]
+    networks: [asynctaskhub_net]
 
   api:
     build:
       context: .
       target: api
-    container_name: posttager_api
+    container_name: asynctaskhub_api
     env_file: .env
     depends_on:
       redis:
@@ -30,7 +30,7 @@ services:
     volumes:
       - .:/app
       - naive_data:/data
-    networks: [posttager_net]
+    networks: [asynctaskhub_net]
 
   db:
     image: postgres:16
@@ -43,13 +43,13 @@ services:
       retries: 10
     volumes:
       - pgdata:/var/lib/postgresql/data
-    networks: [posttager_net]
+    networks: [asynctaskhub_net]
 
   worker:
     build:
       context: .
       target: worker
-    container_name: posttager_worker
+    container_name: asynctaskhub_worker
     env_file: .env
     depends_on:
       redis:
@@ -61,35 +61,35 @@ services:
     restart: unless-stopped
     volumes:
       - .:/app
-    networks: [posttager_net]
+    networks: [asynctaskhub_net]
 
   naive_demo_worker:
     build:
       context: .
       target: runtime
-    container_name: posttager_naive_demo_worker
+    container_name: asynctaskhub_naive_demo_worker
     command: >
       python -m src.naive_worker.compute_pi.worker
     volumes:
       - .:/app
       - naive_data:/data
-    networks: [posttager_net]
+    networks: [asynctaskhub_net]
 
   naive_demo_doc_worker:
     build:
       context: .
       target: runtime
-    container_name: posttager_naive_demo_doc_worker
+    container_name: asynctaskhub_naive_demo_doc_worker
     command: >
       python -m src.naive_worker.document_analysis.worker
     volumes:
       - .:/app
       - naive_data:/data
-    networks: [posttager_net]
+    networks: [asynctaskhub_net]
 
   demo:
     image: nginx:alpine
-    container_name: posttager_demo
+    container_name: asynctaskhub_demo
     depends_on:
       - api
     ports:
@@ -97,14 +97,14 @@ services:
     volumes:
       - ./demo:/usr/share/nginx/html:ro
       - ./demo/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-    networks: [posttager_net]
+    networks: [asynctaskhub_net]
 
   tests:
     profiles: ["test"]
     build:
       context: .
       target: test
-    container_name: posttager_tests
+    container_name: asynctaskhub_tests
     env_file: .env
     depends_on:
       redis:
@@ -115,10 +115,10 @@ services:
       pytest -rs
     volumes:
       - .:/app
-    networks: [posttager_net]
+    networks: [asynctaskhub_net]
 
 networks:
-  posttager_net:
+  asynctaskhub_net:
     driver: bridge
 
 volumes:
