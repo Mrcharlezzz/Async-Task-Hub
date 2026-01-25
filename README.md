@@ -22,7 +22,7 @@ The project is designed to **demonstrate architectural tradeoffs and performance
 
 📺 **Demo Video**
 
-A short demo video is available [HERE](https://youtu.be/VIDEO_LINK)
+A short demo video is available [HERE](https://youtu.be/BhRv2RDzMSA)
 
 
 ## Event-Driven Application Workflow (Sequence Diagram)
